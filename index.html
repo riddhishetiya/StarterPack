@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarterPack</title>
+    <link rel="stylesheet" href="style.css">
+   
+<script src="script.js" defer></script>
+
+</head>
+<body>
+    <nav class="navbar">
+    <div class="logo">StarterPack</div>
+   
+    <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+
+   
+    <div class="nav-actions">
+        <a href="create.html" class="add-btn" title="Create New">+</a>
+       
+    </div>
+</nav>
+<!-- THE INVISIBLE HOT CORNER TRIGGER BOX -->
+<div id="hotCornerTrigger" class="hot-corner"></div>
+
+<!-- THE FULL SCREEN BACKDROP MODAL OVERLAY -->
+<div id="historyOverlayPanel" class="folder-image-overlay">
+    
+    <!-- MAIN DISPLAY BOARD USING THE BACKGROUND PHOTOGRAPH (Close Button Removed) -->
+    <div class="folder-background-board" id="folderBoard">
+        
+        
+        
+        <div class="folder-content-wrapper">
+            <!-- Left Grid: Invisible clickable slots over book positions -->
+            <div class="folder-books-grid">
+                <a href="#exit-west" class="invisible-card-slot" title="View Exit West"></a>
+                <a href="#swallows" class="invisible-card-slot" title="View A Game for Swallows"></a>
+                <a href="#breadwinner" class="invisible-card-slot" title="View The Breadwinner"></a>
+                <a href="#simon" class="invisible-card-slot" title="View Simon vs. Agenda"></a>
+            </div>
+
+            <!-- Right Area: Transparent text layer sitting over the handwritten notepad graphic -->
+            <div class="folder-note-area">
+                <p class="handwritten-text">
+                   MyPacks
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Wrapper that controls the horizontal page shifting -->
+<div class="page-slider-wrapper" id="pageSlider">
+    
+    <!-- MAIN HOMEPAGE WRAPPER VIEW -->
+    <section class="main-page-view">
+        <!-- Keep your existing navbar and scrolling gallery code here -->
+        
+        <!-- SIDE POSITIONED LOCKER ICON TRIGGER -->
+        <div class="side-locker-trigger" id="lockerTrigger">
+            <img src="lockers.webp" alt="Interactive Lockers">
+            
+        </div>
+    </section>
+
+    <!-- INTERACTED PACKS VIEW PAGE (Slides in from the left/pushed right) -->
+    <section class="interactions-page-view">
+        <header class="interactions-header">
+            <h2>Interacted Packs History</h2>
+            <button id="backFromInteractionsBtn" class="back-home-btn">← Back to Dashboard</button>
+        </header>
+        
+        <div class="interactions-content">
+            <p class="empty-state-text">You haven't interacted with any packs yet.</p>
+        </div>
+    </section>
+
+</div>
+
+
+</body>
+</html>
