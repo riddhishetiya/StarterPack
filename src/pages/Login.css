@@ -1,0 +1,462 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  background: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  color: #202033;
+}
+
+/* LEFT SECTION */
+
+.login-visual {
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(125, 95, 255, 0.23),
+      transparent 35%
+    ),
+    linear-gradient(145deg, #17162e, #242044 60%, #31235a);
+  color: white;
+  padding: 30px 8%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.login-visual::before {
+  content: "";
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50%;
+  right: -120px;
+  top: 15%;
+  box-shadow:
+    0 0 0 40px rgba(255,255,255,0.015),
+    0 0 0 80px rgba(255,255,255,0.015);
+}
+
+.visual-content {
+  width: 100%;
+  max-width: 560px;
+  margin: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #9274ff, #6848e8);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  color: white;
+}
+
+.visual-message {
+  margin-top: 55px;
+}
+
+.eyebrow,
+.welcome-label {
+  color: #a99aff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.visual-message h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(38px, 4.2vw, 59px);
+  line-height: 1.12;
+  letter-spacing: -2px;
+  margin: 22px 0;
+}
+
+.visual-message h1 span {
+  color: #a996ff;
+}
+
+.visual-message p {
+  color: #b9b7d0;
+  max-width: 390px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* IDEA CARD */
+
+.idea-card {
+  margin-top: 35px;
+  padding: 23px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.075);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  max-width: 450px;
+}
+
+.idea-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b9b2d8;
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.live-dot {
+  height: 7px;
+  width: 7px;
+  background: #66d9a7;
+  border-radius: 50%;
+}
+
+.idea-members {
+  margin-left: auto;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.idea-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 19px;
+  line-height: 1.45;
+  margin: 22px 0 17px;
+  max-width: 340px;
+}
+
+.idea-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.idea-tags span {
+  background: rgba(159, 137, 255, 0.15);
+  color: #c6baff;
+  border-radius: 20px;
+  padding: 6px 11px;
+  font-size: 11px;
+}
+
+.idea-card-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #b9b7d0;
+  font-size: 12px;
+}
+
+.avatar-stack {
+  display: flex;
+  padding-left: 5px;
+}
+
+.avatar-stack span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #282143;
+  border-radius: 50%;
+  background: #8974db;
+  color: white;
+  font-size: 10px;
+  margin-left: -5px;
+}
+
+.avatar-stack span:nth-child(2) {
+  background: #c77f9c;
+}
+
+.avatar-stack span:nth-child(3) {
+  background: #629b9b;
+}
+
+.avatar-stack span:nth-child(4) {
+  background: #d29c64;
+}
+
+.visual-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #8986a8;
+  font-size: 11px;
+  margin-top: 35px;
+}
+
+/* RIGHT SECTION */
+
+.login-form-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 55px 8%;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 410px;
+}
+
+.mobile-brand {
+  display: none;
+}
+
+.form-heading {
+  margin-bottom: 38px;
+}
+
+.form-heading h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  letter-spacing: -1px;
+  margin: 15px 0 10px;
+  color: #202033;
+}
+
+.form-heading p {
+  color: #858595;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* INPUTS */
+
+.form-group {
+  margin-bottom: 23px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #35354a;
+}
+
+.form-group input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #e6e5ed;
+  border-radius: 9px;
+  padding: 0 15px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #202033;
+  background: #fff;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: #b3b2bf;
+}
+
+.form-group input:focus {
+  border-color: #8065ed;
+  box-shadow: 0 0 0 3px rgba(128,101,237,0.1);
+}
+
+.password-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.password-label a,
+.signup-prompt a {
+  color: #7557e8;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 65px;
+}
+
+.show-password {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: #7557e8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* REMEMBER ME */
+
+.remember-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #777789;
+  font-size: 12px;
+  cursor: pointer;
+  margin: 5px 0 27px;
+}
+
+.remember-option input {
+  accent-color: #7557e8;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* BUTTON */
+
+.login-button {
+  width: 100%;
+  height: 53px;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(100deg, #7658e8, #8a68ef);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(117,87,232,0.2);
+  transition: 0.25s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 25px rgba(117,87,232,0.3);
+}
+
+.login-button span {
+  font-size: 18px;
+}
+
+/* SIGNUP */
+
+.signup-prompt {
+  text-align: center;
+  margin-top: 27px;
+  font-size: 12px;
+  color: #858595;
+}
+
+.signup-prompt a {
+  font-size: 12px;
+}
+
+.login-note {
+  text-align: center;
+  margin-top: 75px;
+  color: #aaa8b6;
+  font-size: 11px;
+}
+
+.login-note span {
+  color: #8b70ed;
+  margin-right: 5px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 0.9fr 1.1fr;
+  }
+
+  .login-visual {
+    padding: 30px 7%;
+  }
+
+  .visual-message h1 {
+    font-size: 43px;
+  }
+
+  .idea-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 700px) {
+  .login-page {
+    display: block;
+  }
+
+  .login-visual {
+    display: none;
+  }
+
+  .login-form-section {
+    min-height: 100vh;
+    padding: 35px 25px;
+  }
+
+  .login-form-container {
+    max-width: 430px;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 65px;
+  }
+
+  .form-heading h2 {
+    font-size: 29px;
+  }
+
+  .login-note {
+    margin-top: 65px;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-form-section {
+    padding: 28px 19px;
+  }
+
+  .form-heading h2 {
+    font-size: 26px;
+  }
+}
