@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarterPack</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+   <div class="scene-container">
+
+    <div class="zoom-wrapper">
+
+        <img src="bgimg.png" class="responsive-img">
+
+        <div class="spotlight-beam" id="yellowBeam"></div>
+
+        <button id="lightSwitch" class="clickable-hotspot"></button>
+
+        <!-- Clickable books area -->
+        <button class="book-hotspot" id="openBook"></button>
+
+        <h1 class="wall-heading" id="wallHeading">
+            BLAH BLAH BLAH
+        </h1>
+
+    </div>
+
+</div>
+
+<!-- Book popup OUTSIDE zoom-wrapper -->
+<div class="book-overlay" id="bookOverlay">
+
+    <div class="book">
+
+        <button class="close-book" id="closeBook">&times;</button>
+
+        <div class="book-cover-title">
+            <span>PERSONAL COLLECTION · 001</span>
+            <h1>STARTER PACK</h1>
+            <p>A LITTLE SPACE FOR EVERYTHING</p>
+        </div>
+
+        <div class="book-pages">
+
+            <div class="page image-page">
+
+                <div class="image-area">
+                    <img id="uploadedImage" src="" alt="Uploaded image">
+                </div>
+
+                <input type="file" id="imageUpload" accept="image/*" hidden>
+
+                <label for="imageUpload" class="pencil-btn" title="Add image">
+                    <svg viewBox="0 0 24 24" width="19" height="19"
+                         fill="none" stroke="currentColor"
+                         stroke-width="1.7" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+                    </svg>
+                </label>
+
+            </div>
+
+            <div class="page writing-page">
+
+                <textarea placeholder="Dear diary..."></textarea>
+
+                <span class="page-number">02</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+    <script>
+       // SPOTLIGHT
+const switchBtn = document.getElementById('lightSwitch');
+const beam = document.getElementById('yellowBeam');
+const heading = document.getElementById('wallHeading');
+
+switchBtn.addEventListener('click', function() {
+    beam.classList.toggle('active');
+    heading.classList.toggle('active');
+});
+
+
+// OPEN BOOK
+const openBook = document.getElementById('openBook');
+const closeBook = document.getElementById('closeBook');
+const bookOverlay = document.getElementById('bookOverlay');
+
+openBook.addEventListener('click', function() {
+    bookOverlay.classList.add('show');
+});
+
+
+// CLOSE BOOK
+closeBook.addEventListener('click', function() {
+    bookOverlay.classList.remove('show');
+});
+
+bookOverlay.addEventListener('click', function(event) {
+    if (event.target === bookOverlay) {
+        bookOverlay.classList.remove('show');
+    }
+});
+
+
+// UPLOAD IMAGE
+const imageUpload = document.getElementById('imageUpload');
+const uploadedImage = document.getElementById('uploadedImage');
+
+imageUpload.addEventListener('change', function() {
+    const file = this.files[0];
+
+    if (file) {
+        uploadedImage.src = URL.createObjectURL(file);
+        uploadedImage.style.display = 'block';
+    }
+});
+
+    </script>
+
+</body>
+</html>
+

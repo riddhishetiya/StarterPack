@@ -1,0 +1,388 @@
+
+/* General styling */
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #A9C0CD;
+    font-family: 'Space Grotesk', sans-serif;
+}
+h1, h2, h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+}
+/* Main container */
+.scene-container {
+    position: relative;
+    width: 100%;
+    margin-top: 25px;
+}
+
+/* Keeps image and overlays together */
+.zoom-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Responsive room image */
+.responsive-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Spotlight beam */
+.spotlight-beam {
+    position: absolute;
+
+    top: 19%;
+    left: 16%;
+
+    width: 80%;
+    height: 42%;
+
+     background: linear-gradient(
+        to bottom,
+        rgba(255, 239, 190, 0.65) 0%,
+        rgba(255, 239, 190, 0.35) 40%,
+        rgba(255, 239, 190, 0.12) 75%,
+        rgba(255, 239, 190, 0) 100%
+    );
+
+    /* 60-degree cone */
+    clip-path: polygon(
+        50% 0%,
+        0% 100%,
+        100% 100%
+    );
+
+    opacity: 0;
+    transition: opacity 0.7s ease-in-out;
+
+    filter: blur(8px);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.spotlight-beam.active {
+    opacity: 1;
+}
+
+/* Spotlight ON */
+.spotlight-beam.active {
+    opacity: 1;
+}
+
+
+/* Spotlight ON */
+.spotlight-beam.active {
+    opacity: 1;
+}
+
+/* Responsive clickable switch */
+.clickable-hotspot {
+    position: absolute;
+
+    /* Adjust to match your switch position */
+    top: 80%;
+    left: 75%;
+
+    width: clamp(32px, 5%, 60px);
+    height: clamp(32px, 8%, 60px);
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    z-index: 5;
+}
+
+/* Remove default button outline */
+.clickable-hotspot:focus {
+    outline: none;
+}
+.wall-heading {
+    position: absolute;
+    top: 38%;
+    left: 56%;
+    transform: translate(-50%, 10px);
+
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 3vw, 42px);
+    letter-spacing: 4px;
+    color: #252832;
+
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+
+    z-index: 3;
+    pointer-events: none;
+    white-space: nowrap;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.wall-heading.active {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+/* Completely blank left page */
+.image-page {
+    position: relative;
+    background: #F4EFE5;
+    padding: 25px;
+}
+
+/* Image fills the page */
+.image-area {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: transparent;
+    height: auto;
+}
+
+.image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Small pencil icon */
+.pencil-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 18px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #777F8B;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.25s ease;
+    z-index: 2;
+}
+
+.pencil-btn:hover {
+    color: #252832;
+    background: #E4DED3;
+    transform: rotate(-10deg);
+}
+
+/* Handwritten right page */
+.writing-page textarea {
+    font-family: 'Caveat', cursive;
+    font-size: 23px;
+    line-height: 31px;
+    color: #343943;
+}
+/* Clickable area over the books */
+.book-hotspot {
+    position: absolute;
+
+    /* Adjust these to match your books */
+    top: 34%;
+    left: 82%;
+
+    width: 15%;
+    height: 15%;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    z-index: 10;
+}
+
+/* Book popup background */
+/* BOOK OVERLAY */
+/* BOOK OVERLAY */
+.book-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 22, 27, 0.65);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.book-overlay.show {
+    display: flex;
+}
+
+/* OPEN BOOK */
+.book {
+    position: relative;
+    width: min(850px, 95vw);
+    padding: 20px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    animation: bookOpen 0.5s ease;
+}
+
+@keyframes bookOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.85) rotate(-2deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+/* BOOK TITLE */
+.book-cover-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #F4EFE5;
+}
+
+.book-cover-title span,
+.book-cover-title p {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #D7E3E9;
+}
+
+.book-cover-title h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 4px;
+    margin: 8px 0;
+}
+
+/* CLOSE BUTTON */
+.close-book {
+    position: absolute;
+    right: 5px;
+    top: -15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    z-index: 20;
+}
+
+/* TWO OPEN PAGES */
+.book-pages {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 420px;
+    background: #E7E1D6;
+    border-radius: 45% 45% 8px 8px / 8% 8% 5px 5px;
+    box-shadow:
+        0 8px 0 #B8B1A7,
+        0 12px 0 #F4EFE5,
+        0 17px 25px rgba(0,0,0,0.35);
+}
+
+/* INDIVIDUAL PAGES */
+.page {
+    position: relative;
+    min-width: 0;
+    min-height: 420px;
+    background: #FAF8F1;
+    box-sizing: border-box;
+    padding: 25px;
+}
+
+/* Curved outer page edges */
+.image-page {
+    border-radius: 90px 12px 5px 18px;
+    box-shadow: inset -12px 0 15px -15px #777;
+}
+
+.writing-page {
+    border-radius: 12px 90px 18px 5px;
+    box-shadow: inset 12px 0 15px -15px #777;
+}
+
+/* CENTRE FOLD */
+.book-pages::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: linear-gradient(
+        to right,
+        #C7C0B5,
+        #EEE9DF,
+        #C7C0B5
+    );
+    transform: translateX(-50%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* LEFT PAGE IMAGE */
+.image-area {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: none;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.image-area img {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* PENCIL ICON */
+.pencil-btn {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777F8B;
+    cursor: pointer;
+    z-index: 6;
+}
+
+.pencil-btn:hover {
+    color: #252832;
+    transform: rotate(-10deg);
+}
+
+/* RIGHT PAGE HANDWRITING */
+.writing-page textarea {
+    width: 100%;
+    height: 340px;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Caveat', cursive;
+    font-size: 25px;
+    line-height: 34px;
+    color: #343943;
+}
+
+/* PAGE NUMBER */
+.page-number {
+    position: absolute;
+    bottom: 12px;
+    right: 25px;
+    color: #999;
+    font-size: 11px;
+}
