@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Signup.css";
+import { registerUser } from "../services/authServices";
 
 const Signup = ({ onSignup }) => {
   const [formData, setFormData] = useState({
@@ -32,70 +33,56 @@ const Signup = ({ onSignup }) => {
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    setError("");
-    setSuccess("");
+  setError("");
+  setSuccess("");
 
-    if (formData.password.length < 8) {
-      setError("Password must contain at least 8 characters.");
-      return;
-    }
+  if (formData.password.length < 8) {
+    setError("Password must contain at least 8 characters.");
+    return;
+  }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
 
-    if (!agreeTerms) {
-      setError("Please accept the terms and conditions.");
-      return;
-    }
+  if (!agreeTerms) {
+    setError("Please accept the terms and conditions.");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetch(
-        "http://localhost:5001/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.fullName,
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
+    await registerUser({
+      name: formData.fullName,
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+    });
 
-      const data = await response.json();
+    setSuccess("Account created successfully!");
 
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed.");
-      }
+    setFormData({
+      fullName: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
 
-      setSuccess("Account created successfully!");
+    setAgreeTerms(false);
 
-      setFormData({
-        fullName: "",
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
+  } catch (error) {
+    console.error("Signup error:", error);
+    setError(error.message || "Something went wrong. Please try again.");
 
-      setAgreeTerms(false);
-
-    } catch (error) {
-      console.error("Signup error:", error);
-      setError(error.message || "Something went wrong. Please try again.");
-
-    } finally {
-      setLoading(false);
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   return (
