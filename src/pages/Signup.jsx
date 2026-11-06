@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Signup.css";
-import { registerUser } from "../services/authServices";
 
 const Signup = ({ onSignup }) => {
   const [formData, setFormData] = useState({
@@ -32,57 +31,46 @@ const Signup = ({ onSignup }) => {
   };
 
 
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  setError("");
-  setSuccess("");
+    setError("");
+    setSuccess("");
 
-  if (formData.password.length < 8) {
-    setError("Password must contain at least 8 characters.");
-    return;
-  }
+    if (formData.password.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
 
-  if (formData.password !== formData.confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-  if (!agreeTerms) {
-    setError("Please accept the terms and conditions.");
-    return;
-  }
+    if (!agreeTerms) {
+      setError("Please accept the terms and conditions.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await registerUser({
-      name: formData.fullName,
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-    });
+      await onSignup({
+        name: formData.fullName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
-    setSuccess("Account created successfully!");
+    } catch (error) {
+      console.error("Signup error:", error);
+      setError(error.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setFormData({
-      fullName: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
-
-    setAgreeTerms(false);
-
-  } catch (error) {
-    console.error("Signup error:", error);
-    setError(error.message || "Something went wrong. Please try again.");
-
-  } finally {
-    setLoading(false);
-  }
-};
 
 
   return (
