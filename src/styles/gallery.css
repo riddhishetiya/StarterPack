@@ -1,0 +1,561 @@
+/* ---------- GALLERY (opens from the poster wall) ---------- */
+.gallery-hotspot {                 /* invisible button over the four posters */
+    position: absolute;
+    top: 13.6%; left: 16%;
+    width: 19%; height: 44.6%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 6;
+}
+.gallery-hotspot:hover { background: rgba(255, 255, 255, 0.12); }
+
+.gallery-overlay {
+    --gal-bg: var(--bg-cork);
+    --ink: #161210; --paper: #fff3cf; --paper2: #fffaf0; --yellow: #ffd23f; --orange: #e8883a; --pink: #ef5c9a;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    padding: 16px;
+    box-sizing: border-box;
+    /* orange hardcover frame with an ink line, like the book */
+    background:
+        radial-gradient(rgba(22, 18, 16, 0.18) 1.5px, transparent 2px) 0 0 / 11px 11px,
+        var(--orange);
+}
+.gallery-overlay.show { display: flex; }
+.gallery-overlay::before {          /* the page inside the frame */
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border: 4px solid var(--ink);
+    border-radius: 8px 12px 10px 7px / 10px 7px 12px 8px;
+    box-shadow: 8px 8px 0 var(--ink);
+    background: var(--gal-bg);
+    pointer-events: none;
+}
+
+.gallery-top {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    padding: 26px 70px 6px 34px;
+}
+.gallery-title {
+    display: inline-block;
+    margin: 0 0 16px;
+    padding: 8px 24px 3px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 5px;
+    color: var(--ink);
+    background: var(--yellow);
+    border: 4px solid var(--ink);
+    border-radius: 6px 14px 5px 12px / 12px 6px 14px 5px;
+    box-shadow: 6px 6px 0 var(--ink);
+    transform: rotate(-1.5deg);
+}
+.gallery-title small {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    letter-spacing: 0;
+    margin-left: 10px;
+    font-weight: 700;
+}
+.gallery-close {
+    position: absolute; top: 24px; right: 30px;
+    width: 42px; height: 42px;
+    border: 3.5px solid var(--ink); border-radius: 50% 46% 52% 48%;
+    background: var(--orange); color: var(--ink);
+    font-size: 22px; line-height: 1; cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    z-index: 6;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.gallery-close:hover { transform: translate(2px, 2px) rotate(8deg); box-shadow: 2px 2px 0 var(--ink); }
+
+/* stickers peeking out of the header (same ones as the book) */
+.gallery-stickers {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background-repeat: no-repeat;
+    background-image: var(--st-eye), var(--st-bolt), var(--st-cassette);
+    background-size: 78px 78px, 54px 54px, 86px 86px;
+    background-position: 56% 8px, 72% 56px, 84% -6px;
+    filter: drop-shadow(3px 4px 0 rgba(22, 18, 16, 0.35));
+}
+
+/* filter button + collapsible category bar */
+.gallery-title { vertical-align: middle; }
+.filter-btn {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 0 16px 22px;
+    padding: 9px 20px 6px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--ink);
+    background: var(--paper2);
+    border: 3.5px solid var(--ink);
+    border-radius: 6px 12px 5px 10px / 10px 6px 12px 5px;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer;
+    transform: rotate(1deg);
+    transition: transform 0.12s, box-shadow 0.12s, background 0.2s;
+}
+.filter-btn:hover { transform: translate(-1px, -2px) rotate(0deg); box-shadow: 5px 6px 0 var(--ink); }
+.filter-btn.open { background: var(--yellow); transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+.filter-btn .arrow { display: inline-block; margin-left: 8px; font-size: 15px; transition: transform 0.25s; }
+.filter-btn.open .arrow { transform: rotate(180deg); }
+.filter-btn .badge {
+    display: none;
+    margin-left: 8px;
+    min-width: 22px; padding: 1px 6px 0;
+    font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0;
+    color: #fff; background: var(--pink);
+    border: 2.5px solid var(--ink); border-radius: 999px;
+}
+.filter-btn .badge.show { display: inline-block; }
+
+.cat-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 8px 0 4px;
+    pointer-events: none;
+    transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.35s ease;
+}
+.cat-bar.open { max-height: 170px; opacity: 1; padding: 6px 8px 16px 4px; pointer-events: auto; }
+.cat-chip {
+    flex: none;
+    padding: 8px 18px 5px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 21px;
+    letter-spacing: 2px;
+    color: var(--ink);
+    background: var(--paper2);
+    border: 3.5px solid var(--ink);
+    border-radius: 6px 12px 5px 10px / 10px 6px 12px 5px;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer;
+    transform: rotate(var(--r, 0deg));
+    transition: transform 0.12s, box-shadow 0.12s, background 0.2s;
+}
+.cat-chip:nth-child(odd)  { --r: -1.2deg; }
+.cat-chip:nth-child(even) { --r: 1deg; }
+.cat-chip b { font-family: 'Caveat', cursive; font-size: 17px; font-weight: 700; margin-left: 7px; color: #2f6fc0; }
+.cat-chip:hover { transform: translate(-1px, -2px) rotate(0deg); box-shadow: 5px 6px 0 var(--ink); }
+.cat-chip.on { background: var(--pink); color: #fff; transform: translate(3px, 3px) rotate(0deg); box-shadow: 1px 1px 0 var(--ink); }
+.cat-chip.on b { color: var(--yellow); }
+
+.gallery-scroll { position: relative; z-index: 1; flex: 1; overflow-y: auto; padding: 18px 38px 40px 34px; margin: 0 6px 6px 0; }
+.gallery-grid {                     /* collage: columns are built by gallery.js */
+    display: flex;
+    align-items: flex-start;
+    gap: 26px;
+}
+.gal-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+
+/* every picture hangs in a hand-inked frame like the posters on the wall.
+   The outline is a polygon with slightly jittered points, so no edge is ruler-straight. */
+.photo {
+    position: relative;
+    margin: 0;
+    margin-top: var(--dy, 0px);
+    cursor: zoom-in;
+    transform: rotate(var(--r, 0deg));
+    filter: drop-shadow(8px 9px 0 rgba(22, 18, 16, 0.42));
+    animation: tileIn 0.45s ease both;
+    transition: transform 0.2s;
+}
+.photo:hover { transform: rotate(0deg) scale(1.04); z-index: 4; }
+.photo::before {                    /* the black frame body */
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: var(--ink);
+    clip-path: var(--po);
+}
+.photo .mat { display: block; clip-path: var(--pi); }
+.photo img { display: block; width: 100%; height: auto; aspect-ratio: var(--a, 1); object-fit: cover; background: #e8dcc0; }
+.photo.f1 { padding: 12px; }                                   /* thick black frame (eye poster) */
+.photo.f2 { padding: 6px; }                                    /* white mat in a black frame (shibui poster) */
+.photo.f2 .mat { background: var(--paper2); padding: 9px; clip-path: var(--pi); }
+.photo.f3 { padding: 7px; }                                    /* slim black frame */
+.photo.tape::after {                /* washi tape */
+    content: ""; position: absolute; top: -14px; left: 50%;
+    width: 72px; height: 22px; z-index: 2;
+    transform: translateX(-50%) rotate(var(--tr, -4deg));
+    background: repeating-linear-gradient(45deg, rgba(239, 92, 154, 0.92) 0 7px, rgba(255, 200, 220, 0.92) 7px 14px);
+    clip-path: polygon(0 8%, 4% 0, 9% 10%, 100% 0, 100% 100%, 95% 90%, 90% 100%, 0 92%);
+}
+.photo.tape.y::after { background: repeating-linear-gradient(45deg, rgba(255, 210, 63, 0.95) 0 7px, rgba(255, 240, 170, 0.95) 7px 14px); }
+.photo.v0 { --po: polygon(0.0% 2.4px, 12.5% 1.8px, 25.0% 2.4px, 37.5% 0.9px, 50.0% 3.4px, 62.5% 3.5px, 75.0% 2.7px, 87.5% 0.7px, 100.0% 2.2px, calc(100% - 1.4px) 12.5%, calc(100% - 1.0px) 25.0%, calc(100% - 4.0px) 37.5%, calc(100% - 4.2px) 50.0%, calc(100% - 0.2px) 62.5%, calc(100% - 3.6px) 75.0%, calc(100% - 2.5px) 87.5%, calc(100% - 1.6px) 100.0%, 87.5% calc(100% - 1.2px), 75.0% calc(100% - 2.8px), 62.5% calc(100% - 1.9px), 50.0% calc(100% - 2.9px), 37.5% calc(100% - 2.8px), 25.0% calc(100% - 0.6px), 12.5% calc(100% - 3.2px), 0.0% calc(100% - 4.1px), 4.1px 87.5%, 2.6px 75.0%, 0.2px 62.5%, 0.0px 50.0%, 0.6px 37.5%, 4.0px 25.0%, 1.3px 12.5%); --pi: polygon(0.0% 1.2px, 16.7% 2.3px, 33.3% 0.1px, 50.0% 0.7px, 66.7% 2.5px, 83.3% 1.7px, 100.0% 0.3px, calc(100% - 0.9px) 16.7%, calc(100% - 2.3px) 33.3%, calc(100% - 1.1px) 50.0%, calc(100% - 0.1px) 66.7%, calc(100% - 2.3px) 83.3%, calc(100% - 0.3px) 100.0%, 83.3% calc(100% - 1.7px), 66.7% calc(100% - 1.6px), 50.0% calc(100% - 1.2px), 33.3% calc(100% - 2.5px), 16.7% calc(100% - 0.5px), 0.0% calc(100% - 1.6px), 0.3px 83.3%, 2.5px 66.7%, 0.4px 50.0%, 1.3px 33.3%, 2.2px 16.7%); }
+.photo.v1 { --po: polygon(0.0% 1.9px, 12.5% 2.4px, 25.0% 3.9px, 37.5% 2.0px, 50.0% 2.1px, 62.5% 2.5px, 75.0% 0.8px, 87.5% 2.2px, 100.0% 2.6px, calc(100% - 3.3px) 12.5%, calc(100% - 0.4px) 25.0%, calc(100% - 1.3px) 37.5%, calc(100% - 0.4px) 50.0%, calc(100% - 3.4px) 62.5%, calc(100% - 2.9px) 75.0%, calc(100% - 0.2px) 87.5%, calc(100% - 4.1px) 100.0%, 87.5% calc(100% - 4.1px), 75.0% calc(100% - 2.7px), 62.5% calc(100% - 2.6px), 50.0% calc(100% - 0.7px), 37.5% calc(100% - 0.1px), 25.0% calc(100% - 2.2px), 12.5% calc(100% - 0.3px), 0.0% calc(100% - 0.8px), 1.0px 87.5%, 0.1px 75.0%, 1.9px 62.5%, 1.9px 50.0%, 3.5px 37.5%, 2.2px 25.0%, 2.7px 12.5%); --pi: polygon(0.0% 1.0px, 16.7% 0.6px, 33.3% 0.4px, 50.0% 2.4px, 66.7% 1.5px, 83.3% 1.8px, 100.0% 1.4px, calc(100% - 1.0px) 16.7%, calc(100% - 1.9px) 33.3%, calc(100% - 1.5px) 50.0%, calc(100% - 2.0px) 66.7%, calc(100% - 1.7px) 83.3%, calc(100% - 2.2px) 100.0%, 83.3% calc(100% - 1.1px), 66.7% calc(100% - 0.4px), 50.0% calc(100% - 0.4px), 33.3% calc(100% - 1.9px), 16.7% calc(100% - 0.4px), 0.0% calc(100% - 1.7px), 1.6px 83.3%, 0.2px 66.7%, 2.0px 50.0%, 0.1px 33.3%, 2.3px 16.7%); }
+.photo.v2 { --po: polygon(0.0% 2.0px, 12.5% 2.8px, 25.0% 2.8px, 37.5% 0.6px, 50.0% 0.0px, 62.5% 1.6px, 75.0% 1.2px, 87.5% 3.4px, 100.0% 2.9px, calc(100% - 2.5px) 12.5%, calc(100% - 2.3px) 25.0%, calc(100% - 2.8px) 37.5%, calc(100% - 0.6px) 50.0%, calc(100% - 1.8px) 62.5%, calc(100% - 0.7px) 75.0%, calc(100% - 3.8px) 87.5%, calc(100% - 0.2px) 100.0%, 87.5% calc(100% - 3.4px), 75.0% calc(100% - 0.3px), 62.5% calc(100% - 2.9px), 50.0% calc(100% - 1.4px), 37.5% calc(100% - 1.7px), 25.0% calc(100% - 3.5px), 12.5% calc(100% - 0.1px), 0.0% calc(100% - 0.3px), 3.8px 87.5%, 2.1px 75.0%, 0.4px 62.5%, 4.1px 50.0%, 4.0px 37.5%, 0.5px 25.0%, 1.8px 12.5%); --pi: polygon(0.0% 1.7px, 16.7% 0.1px, 33.3% 0.7px, 50.0% 0.6px, 66.7% 1.9px, 83.3% 1.8px, 100.0% 2.3px, calc(100% - 0.2px) 16.7%, calc(100% - 1.1px) 33.3%, calc(100% - 0.1px) 50.0%, calc(100% - 0.6px) 66.7%, calc(100% - 1.3px) 83.3%, calc(100% - 0.1px) 100.0%, 83.3% calc(100% - 0.5px), 66.7% calc(100% - 1.7px), 50.0% calc(100% - 1.4px), 33.3% calc(100% - 0.6px), 16.7% calc(100% - 1.5px), 0.0% calc(100% - 2.1px), 0.0px 83.3%, 2.1px 66.7%, 1.8px 50.0%, 0.9px 33.3%, 0.4px 16.7%); }
+.photo.v3 { --po: polygon(0.0% 1.1px, 12.5% 2.9px, 25.0% 2.9px, 37.5% 3.6px, 50.0% 0.8px, 62.5% 1.0px, 75.0% 0.6px, 87.5% 0.9px, 100.0% 3.1px, calc(100% - 0.5px) 12.5%, calc(100% - 2.2px) 25.0%, calc(100% - 0.9px) 37.5%, calc(100% - 1.2px) 50.0%, calc(100% - 1.8px) 62.5%, calc(100% - 3.5px) 75.0%, calc(100% - 2.6px) 87.5%, calc(100% - 0.1px) 100.0%, 87.5% calc(100% - 1.2px), 75.0% calc(100% - 0.6px), 62.5% calc(100% - 3.7px), 50.0% calc(100% - 3.4px), 37.5% calc(100% - 3.4px), 25.0% calc(100% - 3.5px), 12.5% calc(100% - 3.1px), 0.0% calc(100% - 4.0px), 3.3px 87.5%, 1.1px 75.0%, 3.6px 62.5%, 2.0px 50.0%, 3.2px 37.5%, 2.4px 25.0%, 1.8px 12.5%); --pi: polygon(0.0% 0.1px, 16.7% 1.8px, 33.3% 0.4px, 50.0% 1.2px, 66.7% 1.7px, 83.3% 2.1px, 100.0% 1.2px, calc(100% - 1.3px) 16.7%, calc(100% - 0.0px) 33.3%, calc(100% - 1.1px) 50.0%, calc(100% - 1.0px) 66.7%, calc(100% - 2.2px) 83.3%, calc(100% - 1.4px) 100.0%, 83.3% calc(100% - 2.0px), 66.7% calc(100% - 1.1px), 50.0% calc(100% - 0.5px), 33.3% calc(100% - 2.2px), 16.7% calc(100% - 2.1px), 0.0% calc(100% - 1.0px), 0.2px 83.3%, 1.3px 66.7%, 1.3px 50.0%, 2.0px 33.3%, 1.6px 16.7%); }
+@keyframes tileIn { from { opacity: 0; translate: 0 18px; } }
+.gallery-empty { width: 100%; color: var(--ink); text-align: center; padding: 60px 0; font-family: 'Caveat', cursive; font-size: 32px; font-weight: 700; }
+.gallery-sentinel { height: 1px; }
+
+/* viewer */
+.lightbox {
+    position: fixed; inset: 0; z-index: 1200;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(22, 18, 16, 0.92);
+}
+.lightbox.show { display: flex; }
+.lightbox img {
+    max-width: 90vw; max-height: 86vh;
+    border: 4px solid #161210; box-shadow: 8px 8px 0 #161210; background: #fff;
+}
+.lightbox button {
+    position: absolute; width: 44px; height: 44px;
+    border: 3px solid #161210; border-radius: 50%;
+    background: #ffd23f; font-size: 22px; cursor: pointer;
+}
+.lb-close { top: 18px; right: 18px; }
+.lb-prev  { left: 18px; top: 50%; }
+.lb-next  { right: 18px; top: 50%; }
+
+/* wobbly ink lines on the interface */
+.gallery-title, .filter-btn, .cat-chip, .gallery-close, .gallery-overlay::before { filter: url(#galWobble); }
+
+/* ---------- BACKGROUND OPTIONS: pick one by adding its class to #galleryOverlay, e.g. class="gallery-overlay bg-graph" ---------- */
+.gallery-overlay {
+    --bg-cork:
+        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 .25  0 0 0 0 .13  0 0 0 0 .04  0 0 0 1.6 -.55'/></filter><rect width='260' height='260' filter='url(%23c)'/></svg>"),
+        radial-gradient(rgba(255, 230, 190, 0.35) 2px, transparent 3px) 0 0 / 23px 23px,
+        #cf9d63;
+    --bg-graph:
+        linear-gradient(rgba(47, 111, 192, 0.22) 1.5px, transparent 1.5px) 0 0 / 30px 30px,
+        linear-gradient(90deg, rgba(47, 111, 192, 0.22) 1.5px, transparent 1.5px) 0 0 / 30px 30px,
+        #fff6dd;
+    --bg-dark:
+        radial-gradient(rgba(255, 255, 255, 0.55) 1.5px, transparent 2px) 0 0 / 61px 61px,
+        radial-gradient(rgba(239, 92, 154, 0.5) 2px, transparent 2.5px) 20px 31px / 83px 83px,
+        radial-gradient(rgba(255, 210, 63, 0.45) 1.6px, transparent 2.2px) 47px 12px / 97px 97px,
+        #1f1d26;
+    --bg-pink:
+        radial-gradient(rgba(22, 18, 16, 0.2) 3px, transparent 3.5px) 0 0 / 16px 16px,
+        #f06aa4;
+    --bg-yellow:
+        repeating-linear-gradient(135deg, rgba(22, 18, 16, 0.09) 0 10px, transparent 10px 28px),
+        #ffd23f;
+    --bg-checker:
+        conic-gradient(rgba(22, 18, 16, 0.1) 25%, transparent 0 50%, rgba(22, 18, 16, 0.1) 0 75%, transparent 0) 0 0 / 56px 56px,
+        #fff3cf;
+}
+.gallery-overlay.bg-cork    { --gal-bg: var(--bg-cork); }
+.gallery-overlay.bg-graph   { --gal-bg: var(--bg-graph); }
+.gallery-overlay.bg-dark    { --gal-bg: var(--bg-dark); }
+.gallery-overlay.bg-pink    { --gal-bg: var(--bg-pink); }
+.gallery-overlay.bg-yellow  { --gal-bg: var(--bg-yellow); }
+.gallery-overlay.bg-checker { --gal-bg: var(--bg-checker); }
+
+/* ============================================================
+   RETRO WINDOWS 95 / Y2K CHATROOM OVERLAY
+   ============================================================ */
+/* ============================================================
+   RETRO WINDOWS 95 / Y2K CHATROOM OVERLAY (90% SCREEN SIZE)
+   ============================================================ */
+.chat-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(4px);
+}
+
+.chat-overlay.show {
+    display: flex;
+}
+
+.win95-desktop {
+    position: relative;
+    width: 90vw;
+    height: 90vh;
+    padding: 16px;
+    background: #008080; /* Classic Windows Teal */
+    border: 4px solid #fff;
+    box-shadow: 10px 10px 0px #000;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.win95-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #c0c0c0;
+    border: 3px solid;
+    border-color: #dfdfdf #404040 #404040 #dfdfdf;
+    padding: 3px;
+    font-family: 'MS Sans Serif', 'Courier New', monospace;
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Titlebar */
+.win95-titlebar {
+    background: linear-gradient(90deg, #000080, #1084d0);
+    color: white;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.win-icon { margin-right: 6px; }
+
+.win-controls {
+    display: flex;
+    gap: 3px;
+}
+
+.win-btn {
+    width: 20px;
+    height: 18px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+}
+
+.win-btn:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Window Content Body */
+.win95-body {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    background: #c0c0c0;
+    min-height: 0; /* Allows children flex elements to shrink/scroll properly */
+    box-sizing: border-box;
+}
+
+/* Left Dialup Box */
+.dialup-box {
+    width: 260px;
+    height: 100%;
+    background: #fff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 2px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialup-header {
+    background: #808080;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 5px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.dialup-content {
+    padding: 12px;
+    font-size: 12px;
+    color: #000;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.lineup-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 12px;
+    line-height: 1.8;
+    font-weight: bold;
+}
+
+/* Main Chat Section */
+.chat-main {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.chat-header-info {
+    display: flex;
+    justify-content: space-between;
+    background: #fff;
+    padding: 6px 12px;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    font-size: 13px;
+    font-weight: bold;
+    color: #000;
+    flex-shrink: 0;
+}
+
+.chat-messages {
+    flex: 1;
+    min-height: 0; /* Fills remaining height dynamically */
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 12px;
+    overflow-y: auto;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #000;
+}
+
+.msg .user {
+    font-weight: bold;
+    color: #000080;
+}
+
+.msg.system-msg {
+    color: #666;
+    font-style: italic;
+}
+
+.chat-input-bar {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+#chatInput {
+    flex: 1;
+    padding: 6px 8px;
+    background: #fff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    font-family: inherit;
+    font-size: 14px;
+    color: #000;
+}
+
+.win95-btn {
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    padding: 6px 16px;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    color: #000;
+}
+
+.win95-btn:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Y2K Stickers & Decorative Labels */
+.clippy-sticker {
+    position: absolute;
+    top: -30px;
+    right: 40px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.speech-bubble {
+    background: #ffffcc;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 2px 2px 0 #000;
+    color: #000;
+}
+
+.clippy-img {
+    font-size: 36px;
+}
+
+.retro-banner-text {
+    position: absolute;
+    top: -38px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    font-family: 'Impact', 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: #ffee00;
+    text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+    letter-spacing: 2px;
+    pointer-events: none;
+    z-index: 25;
+    white-space: nowrap;
+}
+
+.music-note {
+    position: absolute;
+    font-size: 36px;
+    z-index: 22;
+    pointer-events: none;
+}
+.note-left { bottom: -24px; left: 30px; transform: rotate(-15deg); }
+.note-right { bottom: -24px; right: 30px; transform: rotate(15deg); }
+
+.dog-sticker {
+    position: absolute;
+    bottom: 35px;
+    right: -18px;
+    font-size: 38px;
+    z-index: 22;
+}
+.desc-box {
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+
+.desc-label {
+    display: block;
+    font-size: 10px;
+    font-weight: bold;
+    color: #000080;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.desc-text {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #000000;
+    margin: 0;
+    font-family: inherit;
+    word-break: break-word;
+}

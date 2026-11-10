@@ -1,0 +1,23 @@
+[
+  {
+    "thumb": "https://picsum.photos/id/10/400/300",
+    "full": "https://picsum.photos/id/10/1200/900",
+    "w": 400,
+    "h": 300,
+    "cats": ["Art", "Prints"]
+  },
+  {
+    "thumb": "https://picsum.photos/id/15/300/450",
+    "full": "https://picsum.photos/id/15/900/1350",
+    "w": 300,
+    "h": 450,
+    "cats": ["Photography"]
+  },
+  {
+    "thumb": "https://picsum.photos/id/20/400/400",
+    "full": "https://picsum.photos/id/20/1200/1200",
+    "w": 400,
+    "h": 400,
+    "cats": ["Art"]
+  }
+]
