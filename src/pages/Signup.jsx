@@ -30,8 +30,6 @@ const Signup = ({ onSignup }) => {
     setError("");
   };
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,8 +68,6 @@ const Signup = ({ onSignup }) => {
       setLoading(false);
     }
   };
-
-
 
   return (
     <div className="signup-page">

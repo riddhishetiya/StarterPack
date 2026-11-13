@@ -2,11 +2,15 @@
 /* ------------------------------------------------------------------ */
 /*  BOOK (diary) OVERLAY                                               */
 /* ------------------------------------------------------------------ */
-import { useEffect,useState,useRef,useLayoutEffect } from "react";
-/* ------------------------------------------------------------------ */
-/*  AUTO-FITTING TITLE TEXTAREA                                        */
-/* ------------------------------------------------------------------ */
-function TitleInput() {
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
+import {diaryInputServices} from "../services/diaryInputServices.js"
+
+function BookOverlay({ open, onClose }) {
+  const [imageSrc, setImageSrc] = useState("");
+  const [title, setTitle] = useState("")
+  const [desc, setDesc] = useState("")
+
+  //Handling the Title Input ( Auto fitting title )
   const ref = useRef(null);
 
   useLayoutEffect(() => {
@@ -83,19 +87,6 @@ function TitleInput() {
     };
   }, []);
 
-  return (
-    <textarea
-      ref={ref}
-      className="title-input"
-      placeholder="Title"
-      rows={3}
-      maxLength={60}
-    />
-  );
-}
-
-function BookOverlay({ open, onClose }) {
-  const [imageSrc, setImageSrc] = useState("");
 
   // free the blob URL when it's replaced / on unmount
   useEffect(() => {
@@ -104,9 +95,11 @@ function BookOverlay({ open, onClose }) {
     };
   }, [imageSrc]);
 
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setImageSrc(URL.createObjectURL(file));
+  const handleSave = async(e) => {
+    console.log("Stick : ",imageSrc)
+    const response = await diaryInputServices({title , desc , imageSrc})
+    console.log(response)
+    // return response;
   };
 
   return (
@@ -133,7 +126,7 @@ function BookOverlay({ open, onClose }) {
             <button
               type="button"
               className="stick-btn"
-              onClick={() => console.log("stick clicked")}
+              onClick={handleSave}
             >
               stick
             </button>
@@ -151,7 +144,10 @@ function BookOverlay({ open, onClose }) {
               id="imageUpload"
               accept="image/*"
               hidden
-              onChange={handleUpload}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) setImageSrc(URL.createObjectURL(file));
+              }}
             />
 
             <label htmlFor="imageUpload" className="pencil-btn" title="Add image">
@@ -172,8 +168,21 @@ function BookOverlay({ open, onClose }) {
           </div>
 
           <div className="page writing-page">
-            <TitleInput />
-            <textarea placeholder="Your vision(no essays, show us that it was YOUR idea)" />
+            <textarea
+              ref={ref}
+              className="title-input"
+              placeholder="Title"
+              rows={3}
+              maxLength={60}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              placeholder="Your vision(no essays, show us that it was YOUR idea)"
+              className="descriptionArea"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+            />
             <span className="page-number">02</span>
           </div>
         </div>

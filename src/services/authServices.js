@@ -1,4 +1,3 @@
-
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 export const loginUser = async (credentials) => {
@@ -23,7 +22,6 @@ export const loginUser = async (credentials) => {
   return data;
 };
 
-
 // SIGNUP
 export const registerUser = async (userData) => {
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -47,4 +45,23 @@ export const registerUser = async (userData) => {
   }
 
   return data;
+};
+
+export const getCurrentUser = async () => {
+  const response = await fetch(`${API_URL}/auth/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      return null;
+    }
+
+    throw new Error("Unable to verify authentication");
+  }
+
+  const data = await response.json();
+
+  return data.user;
 };

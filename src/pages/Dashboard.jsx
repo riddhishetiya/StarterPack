@@ -1,4 +1,5 @@
 import roomBackground from "../assets/room_bg_inked.png";
+// import "../utils/gallery.js"
 import "../styles/Dashboard.css";
 import "../styles/gallery.css";
 
@@ -12,6 +13,8 @@ import React, {
 import BookOverlay from "./BookOverlay";
 import WallHeading from "./WallHeading";
 import GalleryOverlay from "./GalleryOverlay"
+
+const openCls = (base, isOpen) => (isOpen ? `${base} show active open` : base);
 
 /* ------------------------------------------------------------------ */
 /*  RETRO CHAT ROOM                                                    */
