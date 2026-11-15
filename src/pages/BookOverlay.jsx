@@ -3,10 +3,11 @@
 /*  BOOK (diary) OVERLAY                                               */
 /* ------------------------------------------------------------------ */
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import {diaryInputServices} from "../services/diaryInputServices.js"
+import { diaryInput } from "../services/diaryServices.js"
 
 function BookOverlay({ open, onClose }) {
-  const [imageSrc, setImageSrc] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [title, setTitle] = useState("")
   const [desc, setDesc] = useState("")
 
@@ -91,13 +92,13 @@ function BookOverlay({ open, onClose }) {
   // free the blob URL when it's replaced / on unmount
   useEffect(() => {
     return () => {
-      if (imageSrc) URL.revokeObjectURL(imageSrc);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
     };
-  }, [imageSrc]);
+  }, [imagePreview]);
 
-  const handleSave = async(e) => {
-    console.log("Stick : ",imageSrc)
-    const response = await diaryInputServices({title , desc , imageSrc})
+  const handleSave = async (e) => {
+    console.log("Stick : ", imagePreview)
+    const response = await diaryInput({ title, desc, imageFile })
     console.log(response)
     // return response;
   };
@@ -133,9 +134,9 @@ function BookOverlay({ open, onClose }) {
             <div className="image-area">
               <img
                 id="uploadedImage"
-                src={imageSrc || undefined}
+                src={imagePreview || undefined}
                 alt="Uploaded image"
-                style={imageSrc ? { display: "block" } : undefined}
+                style={imagePreview ? { display: "block" } : undefined}
               />
             </div>
 
@@ -146,7 +147,11 @@ function BookOverlay({ open, onClose }) {
               hidden
               onChange={(e) => {
                 const file = e.target.files[0];
-                if (file) setImageSrc(URL.createObjectURL(file));
+
+                if (file) {
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }
               }}
             />
 

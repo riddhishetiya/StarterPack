@@ -1,7 +1,6 @@
 import roomBackground from "../assets/room_bg_inked.png";
 // import "../utils/gallery.js"
 import "../styles/Dashboard.css";
-import "../styles/gallery.css";
 
 import React, {
   useEffect,
@@ -214,7 +213,7 @@ export default function App() {
             id="openGallery"
             className="gallery-hotspot"
             aria-label="Open Gallery"
-            onClick={() => setGalleryOpen(true)}
+            onClick={() => setGalleryOpen(true) }
           />
 
           <WallHeading lightOn={lightOn} />

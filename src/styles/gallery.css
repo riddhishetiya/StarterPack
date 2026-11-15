@@ -85,6 +85,20 @@
     background-position: 56% 8px, 72% 56px, 84% -6px;
     filter: drop-shadow(3px 4px 0 rgba(22, 18, 16, 0.35));
 }
+.gallery-item {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
 /* filter button + collapsible category bar */
 .gallery-title { vertical-align: middle; }

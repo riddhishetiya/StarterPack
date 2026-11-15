@@ -17,7 +17,6 @@ import {
   loginUser,
   getCurrentUser,
 } from "./services/authServices";
-import RoomBg from "./assets/room_bg_inked.png"
 
 // Protect routes that require authentication
 const ProtectedRoute = ({ user, loading, children }) => {
@@ -41,19 +40,24 @@ function AppRoutes() {
   // Restore authentication when application loads
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Authentication check failed:", error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+        try {
+            const currentUser = await getCurrentUser();
+            setUser(currentUser);
+
+        } catch (error) {
+            if (error.status !== 401) {
+                console.error("Authentication check failed:", error);
+            }
+
+            setUser(null);
+
+        } finally {
+            setLoading(false);
+        }
     };
 
     checkAuth();
-  }, []);
+}, []);
 
   const handleLogin = async (credentials) => {
     const data = await loginUser(credentials);
@@ -75,7 +79,7 @@ function AppRoutes() {
 
   // Wait until authentication check is complete
   if (loading) {
-    return <img src={RoomBg}></img>;
+    return <div>Authenticating the user...</div>;
   }
 
   return (
