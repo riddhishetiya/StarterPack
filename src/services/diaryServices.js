@@ -6,6 +6,7 @@ export const diaryInput = async (ideaDetails) => {
 
     formData.append("title", ideaDetails.title);
     formData.append("description", ideaDetails.desc);
+    formData.append("categoryId",ideaDetails.categoryId)
 
     if (ideaDetails.imageFile) {
         formData.append("image", ideaDetails.imageFile);

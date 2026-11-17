@@ -1,17 +1,24 @@
-
 /* ------------------------------------------------------------------ */
 /*  BOOK (diary) OVERLAY                                               */
 /* ------------------------------------------------------------------ */
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { diaryInput } from "../services/diaryServices.js"
+import { diaryInput } from "../services/diaryServices.js";
+
+import "../styles/Categories.css"
 
 function BookOverlay({ open, onClose }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
-  const [title, setTitle] = useState("")
-  const [desc, setDesc] = useState("")
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
 
-  //Handling the Title Input ( Auto fitting title )
+  // Category State
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [category, setCategory] = useState("");
+  const [categoryColor, setCategoryColor] = useState("");
+  const [categoryId,setCategoryId]=useState("");
+
+  // Handling the Title Input ( Auto fitting title )
   const ref = useRef(null);
 
   useLayoutEffect(() => {
@@ -88,8 +95,24 @@ function BookOverlay({ open, onClose }) {
     };
   }, []);
 
+  // Close dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleOutsideClick = () => setDropdownOpen(false);
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setDropdownOpen(false);
+    };
 
-  // free the blob URL when it's replaced / on unmount
+    if (dropdownOpen) {
+      document.addEventListener("click", handleOutsideClick);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dropdownOpen]);
+
+  // Free the blob URL when it's replaced / on unmount
   useEffect(() => {
     return () => {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -97,22 +120,39 @@ function BookOverlay({ open, onClose }) {
   }, [imagePreview]);
 
   const handleSave = async (e) => {
-    console.log("Stick : ", imagePreview)
-    const response = await diaryInput({ title, desc, imageFile })
-    console.log(response)
-    // return response;
+    // Optional: make sure element exists before attempting to remove class
+    // const showEl = document.getElementsByClassName("show");
+    // if (showEl.length > 0) {
+    //   showEl[0].classList.remove("show");
+    // }
+    onClose()
+    console.log("Stick : ", imagePreview);
+    const response = await diaryInput({ title, desc, imageFile, categoryId });
+    console.log(response);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      console.log("Image preview : ", imagePreview)
+    }
   };
 
   return (
     <div
-      className={open ? "book-overlay show" : "book-overlay"}
-      id="bookOverlay"
+      className={`book-overlay ${open ? "show" : ""}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div className="book">
-        <button className="close-book" id="closeBook" onClick={onClose}>
+        <button
+          className="close-book"
+          type="button"
+          onClick={onClose}
+        >
           &times;
         </button>
 
@@ -123,6 +163,7 @@ function BookOverlay({ open, onClose }) {
         </div>
 
         <div className="book-pages">
+          {/* IMAGE PAGE */}
           <div className="page image-page">
             <button
               type="button"
@@ -131,13 +172,95 @@ function BookOverlay({ open, onClose }) {
             >
               stick
             </button>
+
             <div className="image-area">
-              <img
-                id="uploadedImage"
-                src={imagePreview || undefined}
-                alt="Uploaded image"
-                style={imagePreview ? { display: "block" } : undefined}
-              />
+              <div className="polaroid-frame">
+                <div className="polaroid-photo">
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt="Uploaded preview"
+                    />
+                  )}
+                </div>
+
+                <div
+                  className="polaroid-chin"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="chin-label">CATEGORY:</span>
+
+                  <div className={`chin-dropdown ${dropdownOpen ? "open" : ""}`} id="chinDropdown">
+                    <button
+                      type="button"
+                      className="chin-trigger"
+                      id="chinTrigger"
+                      aria-haspopup="listbox"
+                      aria-expanded={dropdownOpen}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDropdownOpen((prev) => !prev);
+                      }}
+                    >
+                      <span
+                        className={`chin-dot ${category ? "visible" : ""}`}
+                        id="chinCurrentDot"
+                        style={{ background: categoryColor }}
+                      ></span>
+                      <span
+                        className={`chin-value ${category ? "has-value" : ""}`}
+                        id="chinCurrentText"
+                      >
+                        {category || "pick one..."}
+                      </span>
+                      <span className="chin-arrow">▾</span>
+                    </button>
+
+                    <ul
+                      className="chin-menu"
+                      id="chinMenu"
+                      role="listbox"
+                      aria-label="Idea Category"
+                    >
+                      {[
+                        { id: 1, val: "Tech", color: "#ffd23f", name: "TECH", note: "code & gadgets" },
+                        { id: 2, val: "Design", color: "#ef5c9a", name: "DESIGN", note: "ui & visuals" },
+                        { id: 3, val: "Art", color: "#67a7d6", name: "ART", note: "print & ink" },
+                        { id: 4, val: "Startup", color: "#97b538", name: "STARTUP", note: "big ventures" },
+                        { id: 5, val: "Random", color: "#e68638", name: "WILD", note: "shower thoughts" },
+                      ].map((item) => (
+                        <li
+                          key={item.val}
+                          className={`chin-option ${category === item.val ? "selected" : ""}`}
+                          role="option"
+                          data-value={item.val}
+                          data-color={item.color}
+                          onClick={() => {
+                            setCategory(item.val);
+                            setCategoryId(item.id);
+                            setCategoryColor(item.color);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          <span
+                            className="opt-swatch"
+                            style={{ background: item.color }}
+                          ></span>
+                          <span className="opt-name">{item.name}</span>
+                          <span className="opt-note">{item.note}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Hidden input for backend compatibility */}
+                    <input
+                      type="hidden"
+                      id="ideaCategory"
+                      value={category}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <input
@@ -145,17 +268,14 @@ function BookOverlay({ open, onClose }) {
               id="imageUpload"
               accept="image/*"
               hidden
-              onChange={(e) => {
-                const file = e.target.files[0];
-
-                if (file) {
-                  setImageFile(file);
-                  setImagePreview(URL.createObjectURL(file));
-                }
-              }}
+              onChange={handleImageChange}
             />
 
-            <label htmlFor="imageUpload" className="pencil-btn" title="Add image">
+            <label
+              htmlFor="imageUpload"
+              className="pencil-btn"
+              title="Add image"
+            >
               <svg
                 viewBox="0 0 24 24"
                 width="19"
@@ -172,9 +292,9 @@ function BookOverlay({ open, onClose }) {
             </label>
           </div>
 
+          {/* WRITING PAGE */}
           <div className="page writing-page">
             <textarea
-              ref={ref}
               className="title-input"
               placeholder="Title"
               rows={3}
@@ -182,12 +302,14 @@ function BookOverlay({ open, onClose }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+
             <textarea
-              placeholder="Your vision(no essays, show us that it was YOUR idea)"
               className="descriptionArea"
+              placeholder="Your vision (no essays, show us that it was YOUR idea)"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
             />
+
             <span className="page-number">02</span>
           </div>
         </div>
@@ -195,4 +317,5 @@ function BookOverlay({ open, onClose }) {
     </div>
   );
 }
+
 export default BookOverlay;

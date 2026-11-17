@@ -1,40 +1,39 @@
 /* ------------------------------------------------------------------ */
 /*  GALLERY + LIGHTBOX + CHATROOM HOOKS                                */
-/*  (gallery.js has been folded in; do NOT import it separately)       */
 /* ------------------------------------------------------------------ */
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
 
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import "../styles/Gallery.css";
-
 import { ideasFetch } from "../services/diaryServices";
-
 
 const DEFAULT_DESC =
   "A cool retro aesthetic piece capturing the raw energy of underground web culture and creative vision.";
 
-// The original CSS toggles a state class on overlays. Since gallery.css /
-// carousel.css weren't included, apply the usual candidates so either works.
 const openCls = (base, isOpen) => (isOpen ? `${base} show active open` : base);
 
-const PAGE_SIZE = 36; // BATCH from gallery.js
-const MODE = "any"; // "any" | "all" – how multiple selected categories combine
+const PAGE_SIZE = 36;
 const COL_WIDTH = 230;
 const GAP = 26;
+
 const FRAMES = ["f1", "f2", "f3", "f1", "f3", "f2", "f1"];
+
 const STICKERS = ["eye", "bolt", "cassette", "checker", "floppy", "rec", "xsmile", "barcode"];
 
-const calcCols = (width) =>
-  Math.max(2, Math.floor((width + GAP) / (COL_WIDTH + GAP)));
+// Category IDs must match the IDs in your PostgreSQL database.
+const CATEGORIES = [
+  { id: 1, name: "Tech" },
+  { id: 2, name: "Design" },
+  { id: 3, name: "Art" },
+  { id: 4, name: "Startup" },
+  { id: 5, name: "Random" },
+];
+
+const calcCols = (width) => Math.max(2, Math.floor((width + GAP) / (COL_WIDTH + GAP)));
 
 function GalleryOverlay({ open, onClose, onOpenChat }) {
+  /* ---------------------------- STATE ---------------------------- */
   const [photos, setPhotos] = useState([]);
-  const [selected, setSelected] = useState(() => new Set());
+  const [categoryId, setCategoryId] = useState(0);
   const [panelOpen, setPanelOpen] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [lightboxIndex, setLightboxIndex] = useState(null);
@@ -42,42 +41,42 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
   const [gridWidth, setGridWidth] = useState(0);
   const [noAnim, setNoAnim] = useState(false);
 
+  /* ---------------------------- REFS ---------------------------- */
   const overlayRef = useRef(null);
   const sentinelRef = useRef(null);
   const scrollRef = useRef(null);
   const gridRef = useRef(null);
   const loadedRef = useRef(false);
 
-  //Fetching the images from db to gallery
+  /* ---------------------------- FETCH IDEAS ---------------------------- */
   useEffect(() => {
     if (!open) return;
-
     const fetchPhotos = async () => {
       try {
+        loadedRef.current = false;
         const data = await ideasFetch();
-
-        console.log("Fetched data :", data);
+        console.log("Fetched data:", data);
         const galleryPhotos = data.map((photo) => ({
           id: photo.id,
           thumb: photo.image_src,
           full: photo.image_src,
           w: 1,
           h: 1,
-          cats: [],
-          desc: "",
+          // Preserve the category ID returned by the backend.
+          category_id: Number(photo.category_id ?? photo.categoryId ?? 0),
+          desc: photo.description || "",
         }));
-
         console.log("Gallery photos:", galleryPhotos);
         setPhotos(galleryPhotos);
+        loadedRef.current = true;
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching gallery ideas:", error);
       }
     };
-
     fetchPhotos();
   }, [open]);
 
-  /* ---------- hand-drawn wobble filter (injected once) ---------- */
+  /* ---------------------------- WOBBLE FILTER ---------------------------- */
   useEffect(() => {
     if (document.getElementById("galWobble")) return;
     const s = document.createElement("div");
@@ -89,7 +88,7 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     document.body.appendChild(s);
   }, []);
 
-  /* ---------- borrow sticker drawings if the book is present ---------- */
+  /* ---------------------------- BORROW BOOK STICKERS ---------------------------- */
   useEffect(() => {
     if (!open || !overlayRef.current) return;
     const bookEl = document.querySelector(".book-pages");
@@ -97,57 +96,55 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     const cs = getComputedStyle(bookEl);
     STICKERS.forEach((n) => {
       const v = cs.getPropertyValue(`--st-${n}`);
-      if (v) overlayRef.current.style.setProperty(`--st-${n}`, v);
+      if (v) {
+        overlayRef.current.style.setProperty(`--st-${n}`, v);
+      }
     });
   }, [open]);
 
-  /* ---------- categories (multi-select chips with counts) ---------- */
+  /* ---------------------------- CATEGORY COUNTS ---------------------------- */
   const categoryCounts = useMemo(() => {
     const counts = {};
-    photos.forEach((p) =>
-      p.cats.forEach((c) => {
-        counts[c] = (counts[c] || 0) + 1;
-      })
-    );
+    photos.forEach((photo) => {
+      const id = photo.category_id;
+      if (id) {
+        counts[id] = (counts[id] || 0) + 1;
+      }
+    });
     return counts;
   }, [photos]);
 
+  /* ---------------------------- CATEGORY FILTERING ---------------------------- */
   const filtered = useMemo(() => {
-    const sel = Array.from(selected);
-    if (!sel.length) return photos;
-    return photos.filter((p) =>
-      MODE === "all"
-        ? sel.every((c) => p.cats.includes(c))
-        : sel.some((c) => p.cats.includes(c))
-    );
-  }, [photos, selected]);
+    // categoryId = 0 means no filter.
+    if (categoryId === 0) {
+      return photos;
+    }
+    return photos.filter((photo) => photo.category_id === categoryId);
+  }, [photos, categoryId]);
 
+  /* ---------------------------- VISIBLE PHOTOS ---------------------------- */
   const shown = useMemo(() => filtered.slice(0, visible), [filtered, visible]);
+
   const lightboxOpen = lightboxIndex !== null;
   const lbImage = lightboxOpen ? filtered[lightboxIndex] : null;
 
+  /* ---------------------------- RESET GALLERY VIEW ---------------------------- */
   const resetView = () => {
     setVisible(PAGE_SIZE);
     setNoAnim(false);
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
   };
 
-  const toggleCategory = (name) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
+  /* ---------------------------- CATEGORY CHANGE ---------------------------- */
+  const handleCategoryChange = (id) => {
+    setCategoryId(id);
     resetView();
   };
 
-  const clearCategories = () => {
-    setSelected(new Set());
-    resetView();
-  };
-
-  /* ---------- masonry column layout ---------- */
+  /* ---------------------------- MASONRY COLUMN LAYOUT ---------------------------- */
   useEffect(() => {
     if (!open) return;
     const measure = () => {
@@ -156,7 +153,9 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
       setGridWidth(w);
       setColCount((prev) => {
         const n = calcCols(w);
-        if (n !== prev) setNoAnim(true); // relayout shouldn't replay the pop-in
+        if (n !== prev) {
+          setNoAnim(true);
+        }
         return n;
       });
     };
@@ -173,6 +172,7 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     };
   }, [open, photos.length]);
 
+  /* ---------------------------- DISTRIBUTE PHOTOS INTO COLUMNS ---------------------------- */
   const columns = useMemo(() => {
     const colW = gridWidth ? gridWidth / colCount : COL_WIDTH;
     const cols = Array.from({ length: colCount }, () => []);
@@ -180,20 +180,25 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     shown.forEach((p, idx) => {
       const a = p.w && p.h ? p.w / p.h : 1;
       let k = 0;
-      for (let i = 1; i < heights.length; i++) if (heights[i] < heights[k]) k = i;
+      for (let i = 1; i < heights.length; i++) {
+        if (heights[i] < heights[k]) {
+          k = i;
+        }
+      }
       cols[k].push({ p, idx, a });
       heights[k] += colW / a + 40;
     });
     return cols;
   }, [shown, colCount, gridWidth]);
 
-  /* ---------- infinite scroll ---------- */
+  /* ---------------------------- INFINITE SCROLL ---------------------------- */
   useEffect(() => {
     if (!open || !sentinelRef.current) return;
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting)
+        if (entries[0].isIntersecting) {
           setVisible((v) => Math.min(v + PAGE_SIZE, filtered.length));
+        }
       },
       { root: scrollRef.current, rootMargin: "800px" }
     );
@@ -201,59 +206,69 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     return () => io.disconnect();
   }, [open, filtered.length, visible]);
 
-  /* ---------- lightbox controls ---------- */
+  /* ---------------------------- LIGHTBOX CONTROLS ---------------------------- */
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
+
   const prev = useCallback(
-    () =>
-      setLightboxIndex((i) =>
-        i === null ? i : (i - 1 + filtered.length) % filtered.length
-      ),
-    [filtered.length]
-  );
-  const next = useCallback(
-    () =>
-      setLightboxIndex((i) => (i === null ? i : (i + 1) % filtered.length)),
+    () => setLightboxIndex((i) => (i === null ? i : (i - 1 + filtered.length) % filtered.length)),
     [filtered.length]
   );
 
-  /* ---------- chatroom ---------- */
+  const next = useCallback(
+    () => setLightboxIndex((i) => (i === null ? i : (i + 1) % filtered.length)),
+    [filtered.length]
+  );
+
+  /* ---------------------------- CHATROOM ---------------------------- */
   const openChatRoom = useCallback(
     (photo) => {
       const chatOverlay = document.getElementById("chatOverlay");
       if (!chatOverlay) {
-        if (onOpenChat) onOpenChat(photo);
+        if (onOpenChat) {
+          onOpenChat(photo);
+        }
         return;
       }
       const descEl = document.getElementById("chatImgDescription");
-      if (descEl) descEl.textContent = (photo && photo.desc) || DEFAULT_DESC;
+      if (descEl) {
+        descEl.textContent = (photo && photo.desc) || DEFAULT_DESC;
+      }
       chatOverlay.classList.add("show");
-      if (onOpenChat) onOpenChat(photo);
+      if (onOpenChat) {
+        onOpenChat(photo);
+      }
     },
     [onOpenChat]
   );
 
-  /* ---------- unified keyboard handling ----------
-     Escape: close chat first, then lightbox, then the gallery.
-     Arrows: navigate the lightbox. */
+  /* ---------------------------- KEYBOARD HANDLING ---------------------------- */
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
       const chatOverlay = document.getElementById("chatOverlay");
       const chatOpen = chatOverlay && chatOverlay.classList.contains("show");
       if (e.key === "Escape") {
-        if (chatOpen) chatOverlay.classList.remove("show");
-        else if (lightboxOpen) closeLightbox();
-        else onClose();
+        if (chatOpen) {
+          chatOverlay.classList.remove("show");
+        } else if (lightboxOpen) {
+          closeLightbox();
+        } else {
+          onClose();
+        }
       } else if (lightboxOpen && !chatOpen) {
-        if (e.key === "ArrowLeft") prev();
-        if (e.key === "ArrowRight") next();
+        if (e.key === "ArrowLeft") {
+          prev();
+        }
+        if (e.key === "ArrowRight") {
+          next();
+        }
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, lightboxOpen, closeLightbox, prev, next, onClose]);
 
-  // closing the gallery also closes the lightbox and filter panel
+  /* ---------------------------- CLOSE OVERLAYS ---------------------------- */
   useEffect(() => {
     if (!open) {
       setLightboxIndex(null);
@@ -261,7 +276,7 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     }
   }, [open]);
 
-  /* ---------- chat overlay wiring (close button, backdrop, form) ---------- */
+  /* ---------------------------- CHAT OVERLAY WIRING ---------------------------- */
   useEffect(() => {
     const chatOverlay = document.getElementById("chatOverlay");
     const closeChatBtn = document.getElementById("closeChat");
@@ -269,10 +284,18 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
     const chatInput = document.getElementById("chatInput");
     const chatMessages = document.getElementById("chatMessages");
 
-    const hide = () => chatOverlay && chatOverlay.classList.remove("show");
-    const onBackdrop = (e) => {
-      if (e.target === chatOverlay) hide();
+    const hide = () => {
+      if (chatOverlay) {
+        chatOverlay.classList.remove("show");
+      }
     };
+
+    const onBackdrop = (e) => {
+      if (e.target === chatOverlay) {
+        hide();
+      }
+    };
+
     const onSubmit = (e) => {
       e.preventDefault();
       const text = chatInput.value.trim();
@@ -287,56 +310,74 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
       userSpan.className = "user";
       userSpan.textContent = `You [${timeStr}]:`;
       msgDiv.appendChild(userSpan);
-      // textContent (not innerHTML) so user input can't inject markup
       msgDiv.appendChild(document.createTextNode(" " + text));
       chatMessages.appendChild(msgDiv);
       chatInput.value = "";
       chatMessages.scrollTop = chatMessages.scrollHeight;
     };
 
-    if (closeChatBtn) closeChatBtn.addEventListener("click", hide);
-    if (chatOverlay) chatOverlay.addEventListener("click", onBackdrop);
-    if (chatForm) chatForm.addEventListener("submit", onSubmit);
+    if (closeChatBtn) {
+      closeChatBtn.addEventListener("click", hide);
+    }
+    if (chatOverlay) {
+      chatOverlay.addEventListener("click", onBackdrop);
+    }
+    if (chatForm) {
+      chatForm.addEventListener("submit", onSubmit);
+    }
+
     return () => {
-      if (closeChatBtn) closeChatBtn.removeEventListener("click", hide);
-      if (chatOverlay) chatOverlay.removeEventListener("click", onBackdrop);
-      if (chatForm) chatForm.removeEventListener("submit", onSubmit);
+      if (closeChatBtn) {
+        closeChatBtn.removeEventListener("click", hide);
+      }
+      if (chatOverlay) {
+        chatOverlay.removeEventListener("click", onBackdrop);
+      }
+      if (chatForm) {
+        chatForm.removeEventListener("submit", onSubmit);
+      }
     };
   }, []);
 
-  /* ---------- chat header dates ---------- */
+  /* ---------------------------- CHAT HEADER DATES ---------------------------- */
   useEffect(() => {
     const now = new Date();
     const month = now.toLocaleString("en-US", { month: "long" });
     const weekday = now.toLocaleString("en-US", { weekday: "long" });
-    const fullDate = `${month} ${now.getDate()} ${weekday}`; // "November 9 Monday"
+    const fullDate = `${month} ${now.getDate()} ${weekday}`;
     const mm = String(now.getMonth() + 1).padStart(2, "0");
     const dd = String(now.getDate()).padStart(2, "0");
-    const shortDate = `${mm}.${dd}`; // "11.09"
-
+    const shortDate = `${mm}.${dd}`;
     const headerDateEl = document.getElementById("chatHeaderDate");
     const dialupDateEl = document.getElementById("dialupDate");
-    if (headerDateEl) headerDateEl.textContent = fullDate;
-    if (dialupDateEl) dialupDateEl.textContent = shortDate;
+    if (headerDateEl) {
+      headerDateEl.textContent = fullDate;
+    }
+    if (dialupDateEl) {
+      dialupDateEl.textContent = shortDate;
+    }
   }, []);
 
-  /* ---------- perf clock ---------- */
+  /* ---------------------------- PERF CLOCK ---------------------------- */
   useEffect(() => {
     const tick = () => {
       const now = new Date();
       const hh = String(now.getHours()).padStart(2, "0");
       const mi = String(now.getMinutes()).padStart(2, "0");
       const el = document.getElementById("perfTime");
-      if (el) el.textContent = `${hh}.${mi}`;
+      if (el) {
+        el.textContent = `${hh}.${mi}`;
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
-  /* ---------------------------- render ---------------------------- */
+  /* ---------------------------- RENDER ---------------------------- */
   return (
     <>
+      {/* ---------------- GALLERY OVERLAY ---------------- */}
       <div
         id="galleryOverlay"
         ref={overlayRef}
@@ -344,6 +385,7 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
       >
         <div className="gallery-stickers" />
 
+        {/* ---------------- GALLERY HEADER ---------------- */}
         <div className="gallery-top">
           <h1 className="gallery-title">
             GALLERY{" "}
@@ -361,43 +403,49 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
             ✖
           </button>
 
-          {/* FILTER button */}
+          {/* FILTER BUTTON */}
           <button
             type="button"
             className={panelOpen ? "filter-btn open" : "filter-btn"}
             onClick={() => setPanelOpen((o) => !o)}
           >
             FILTER
-            <span className={selected.size > 0 ? "badge show" : "badge"}>
-              {selected.size}
+            <span className={categoryId !== 0 ? "badge show" : "badge"}>
+              {categoryId !== 0 ? 1 : 0}
             </span>
             <span className="arrow">▼</span>
           </button>
 
+          {/* ---------------- CATEGORY FILTER PANEL ---------------- */}
           <div className={panelOpen ? "cat-bar open" : "cat-bar"}>
+            {/* ALL CATEGORIES */}
             <button
               type="button"
-              className={selected.size === 0 ? "cat-chip on" : "cat-chip"}
-              onClick={clearCategories}
+              className={categoryId === 0 ? "cat-chip on" : "cat-chip"}
+              onClick={() => handleCategoryChange(0)}
             >
-              All<b>{photos.length}</b>
+              All
+              <b>{photos.length}</b>
             </button>
-            {Object.keys(categoryCounts)
-              .sort()
-              .map((name) => (
+
+            {/* INDIVIDUAL CATEGORY FILTERS */}
+            {[...CATEGORIES]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((category) => (
                 <button
-                  key={name}
+                  key={category.id}
                   type="button"
-                  className={selected.has(name) ? "cat-chip on" : "cat-chip"}
-                  onClick={() => toggleCategory(name)}
+                  className={categoryId === category.id ? "cat-chip on" : "cat-chip"}
+                  onClick={() => handleCategoryChange(category.id)}
                 >
-                  {name}
-                  <b>{categoryCounts[name]}</b>
+                  {category.name}
+                  <b>{categoryCounts[category.id] ?? 0}</b>
                 </button>
               ))}
           </div>
         </div>
 
+        {/* ---------------- GALLERY SCROLL AREA ---------------- */}
         <div
           className="gallery-scroll"
           ref={scrollRef}
@@ -448,12 +496,14 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
         </div>
       </div>
 
-      {/* LIGHTBOX */}
+      {/* ---------------- LIGHTBOX ---------------- */}
       <div
         id="lightbox"
         className={openCls("lightbox", lightboxOpen)}
         onClick={(e) => {
-          if (e.target === e.currentTarget) closeLightbox();
+          if (e.target === e.currentTarget) {
+            closeLightbox();
+          }
         }}
       >
         <button
