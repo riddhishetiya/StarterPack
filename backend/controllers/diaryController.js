@@ -6,7 +6,6 @@ export const saveDiaryInput = async (req, res) => {
         const creatorId = req.user.userId;
 
         let imageSrc = null;
-
         // Upload image to Cloudinary if one was selected
         if (req.file) {
             const uploadResult = await new Promise((resolve, reject) => {
@@ -26,14 +25,15 @@ export const saveDiaryInput = async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO "Ideas"
-            (creator_id, title, description, image_src)
-            VALUES ($1, $2, $3, $4)
+            (creator_id, title, description, image_src, category_id)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
             [
                 creatorId,
                 req.body.title,
                 req.body.description,
-                imageSrc
+                imageSrc,
+                req.body.categoryId
             ]
         );
 
@@ -55,10 +55,10 @@ export const saveDiaryInput = async (req, res) => {
 export const ideasFetch = async(req,res)=>{
     try{
         const result = await pool.query(
-            `SELECT id,image_src
+            `SELECT id,image_src,category_id
             FROM "Ideas"`
         )
-        console.log("Result : ",result.rows)
+        // console.log("Result : ",result.rows)
         res.status(200).json(result.rows)
     }
     catch(error){
