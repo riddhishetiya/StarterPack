@@ -52,19 +52,19 @@ export const saveDiaryInput = async (req, res) => {
 };
 
 
-export const ideasFetch = async(req,res)=>{
-    try{
+export const ideasFetch = async (req, res) => {
+    try {
         const result = await pool.query(
-            `SELECT id,image_src,category_id
-            FROM "Ideas"`
-        )
-        // console.log("Result : ",result.rows)
-        res.status(200).json(result.rows)
+            `SELECT id, title, description, category_id, creator_id, image_src, created_at
+            FROM "Ideas"
+            ORDER BY created_at DESC`
+        );
+        res.status(200).json(result.rows);
     }
-    catch(error){
-        console.log(error)
+    catch (error) {
+        console.log(error);
         res.status(500).json({
-            message : "Failed to fetch ideas",
-        })
+            message: "Failed to fetch ideas",
+        });
     }
-}
+};

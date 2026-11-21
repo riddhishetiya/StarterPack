@@ -1,12 +1,19 @@
+import http from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { pool } from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
-import diaryRoutes from "./routes/diaryRoutes.js"
+import diaryRoutes from "./routes/diaryRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import { setupSocket } from "./socket.js";
 
 const app = express();
+const server = http.createServer(app);
+
+// Setup Socket.io
+setupSocket(server);
 
 // Middleware
 app.use(cors({
@@ -19,7 +26,9 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/diary",diaryRoutes)
+app.use("/api/diary", diaryRoutes);
+app.use("/api/chat", chatRoutes);
+
 // Basic route
 app.get("/", (req, res) => {
     res.send("Backend server is running!");
@@ -49,6 +58,6 @@ app.get("/api/health", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
