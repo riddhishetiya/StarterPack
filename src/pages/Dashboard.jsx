@@ -11,142 +11,11 @@ import React, {
 //JSX FILES FOR DASHBOARD
 import BookOverlay from "./BookOverlay";
 import WallHeading from "./WallHeading";
-import GalleryOverlay from "./GalleryOverlay"
+import GalleryOverlay from "./GalleryOverlay";
+import ChatOverlay from "./ChatOverlay";
+import { getCurrentUser } from "../services/authServices";
 
 const openCls = (base, isOpen) => (isOpen ? `${base} show active open` : base);
-
-/* ------------------------------------------------------------------ */
-/*  RETRO CHAT ROOM                                                    */
-/* ------------------------------------------------------------------ */
-function formatChatDate(d) {
-  const month = d.toLocaleString("en-US", { month: "long" });
-  const weekday = d.toLocaleString("en-US", { weekday: "long" });
-  return `${month} ${d.getDate()} ${weekday}`;
-}
-
-function ChatOverlay({ open, onClose, image }) {
-  const [messages, setMessages] = useState([
-    { user: "Clippy", text: "Welcome to the chat room! Feel free to leave a message." },
-  ]);
-  const [draft, setDraft] = useState("");
-  const [elapsed, setElapsed] = useState(0);
-  const logRef = useRef(null);
-
-  // elapsed-time readout in the dial-up box, runs while the chat is open
-  useEffect(() => {
-    if (!open) return;
-    setElapsed(0);
-    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, [open]);
-
-  // keep the log scrolled to the newest message
-  useEffect(() => {
-    const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, open]);
-
-  const perfTime = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}.${String(
-    elapsed % 60
-  ).padStart(2, "0")}`;
-
-  const submit = (e) => {
-    e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    setMessages((m) => [...m, { user: "You", text }]);
-    setDraft("");
-  };
-
-  return (
-    <div id="chatOverlay" className={openCls("chat-overlay", open)}>
-      <div className="win95-desktop">
-        <div className="win95-window">
-          <div className="win95-titlebar">
-            <div className="title-text">
-              <span className="win-icon">💬</span>
-              <span>Chat Room </span>
-            </div>
-            <div className="win-controls">
-              <button className="win-btn" type="button" title="Minimize">_</button>
-              <button className="win-btn" type="button" title="Maximize">□</button>
-              <button
-                className="win-btn close-chat"
-                id="closeChat"
-                type="button"
-                title="Close"
-                onClick={onClose}
-              >
-                ✖
-              </button>
-            </div>
-          </div>
-
-          <div className="clippy-sticker">
-            <div className="speech-bubble">sick lmao</div>
-            <div className="clippy-img">📎</div>
-          </div>
-
-          <div className="retro-banner-text">pretty fly for a wifi</div>
-          <div className="music-note note-left">🎵</div>
-          <div className="music-note note-right">🎶</div>
-          <div className="dog-sticker">🐕🎸</div>
-
-          <div className="win95-body">
-            <div className="dialup-box">
-              <div className="dialup-header">
-                <span id="perfTime">{perfTime}</span>
-                <div className="mini-controls">
-                  <span>_</span>
-                  <span>□</span>
-                </div>
-              </div>
-              <div className="dialup-content">
-                <div className="desc-box">
-                  <span className="desc-label">DESCRIPTION</span>
-                  <p id="chatImgDescription" className="desc-text">
-                    {image
-                      ? image.description
-                      : "A cool retro aesthetic piece capturing the raw energy of underground web culture and creative vision."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="chat-main">
-              <div className="chat-header-info">
-                <span id="chatHeaderDate">{formatChatDate(new Date())}</span>
-              </div>
-
-              <div className="chat-messages" id="chatMessages" ref={logRef}>
-                {messages.map((m, i) => (
-                  <div className="msg" key={i}>
-                    <span className="user">{m.user}:</span> {m.text}
-                  </div>
-                ))}
-              </div>
-
-              <form id="chatForm" className="chat-input-bar" onSubmit={submit}>
-                <input
-                  type="text"
-                  id="chatInput"
-                  placeholder="Type a message..."
-                  autoComplete="off"
-                  required
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                />
-                <button type="submit" className="win95-btn">
-                  SEND
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  CAROUSEL OVERLAY                                                   */
@@ -167,13 +36,26 @@ function CarouselOverlay({ open, onClose, children }) {
   );
 }
 
-export default function App() {
+export default function Dashboard({ user: propUser }) {
+  const [user, setUser] = useState(propUser || null);
   const [lightOn, setLightOn] = useState(false); // spotlight + wall heading
   const [bookOpen, setBookOpen] = useState(false); // diary
   const [galleryOpen, setGalleryOpen] = useState(false); // paintings
   const [chatOpen, setChatOpen] = useState(false);
   const [chatImage, setChatImage] = useState(null);
   const [carouselOpen, setCarouselOpen] = useState(false);
+
+  useEffect(() => {
+    if (propUser) {
+      setUser(propUser);
+    } else {
+      getCurrentUser()
+        .then((u) => {
+          if (u) setUser(u);
+        })
+        .catch(() => {});
+    }
+  }, [propUser]);
 
   const openChat = (img) => {
     setChatImage(img);
@@ -236,6 +118,7 @@ export default function App() {
       <ChatOverlay
         open={chatOpen}
         image={chatImage}
+        user={user}
         onClose={() => setChatOpen(false)}
       />
     </>

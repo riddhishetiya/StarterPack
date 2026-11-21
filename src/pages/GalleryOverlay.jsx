@@ -64,7 +64,10 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
           h: 1,
           // Preserve the category ID returned by the backend.
           category_id: Number(photo.category_id ?? photo.categoryId ?? 0),
+          title: photo.title || "",
           desc: photo.description || "",
+          description: photo.description || "",
+          creator_id: photo.creator_id,
         }));
         console.log("Gallery photos:", galleryPhotos);
         setPhotos(galleryPhotos);
@@ -222,18 +225,6 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
   /* ---------------------------- CHATROOM ---------------------------- */
   const openChatRoom = useCallback(
     (photo) => {
-      const chatOverlay = document.getElementById("chatOverlay");
-      if (!chatOverlay) {
-        if (onOpenChat) {
-          onOpenChat(photo);
-        }
-        return;
-      }
-      const descEl = document.getElementById("chatImgDescription");
-      if (descEl) {
-        descEl.textContent = (photo && photo.desc) || DEFAULT_DESC;
-      }
-      chatOverlay.classList.add("show");
       if (onOpenChat) {
         onOpenChat(photo);
       }
@@ -245,17 +236,13 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
-      const chatOverlay = document.getElementById("chatOverlay");
-      const chatOpen = chatOverlay && chatOverlay.classList.contains("show");
       if (e.key === "Escape") {
-        if (chatOpen) {
-          chatOverlay.classList.remove("show");
-        } else if (lightboxOpen) {
+        if (lightboxOpen) {
           closeLightbox();
         } else {
           onClose();
         }
-      } else if (lightboxOpen && !chatOpen) {
+      } else if (lightboxOpen) {
         if (e.key === "ArrowLeft") {
           prev();
         }
@@ -275,69 +262,6 @@ function GalleryOverlay({ open, onClose, onOpenChat }) {
       setPanelOpen(false);
     }
   }, [open]);
-
-  /* ---------------------------- CHAT OVERLAY WIRING ---------------------------- */
-  useEffect(() => {
-    const chatOverlay = document.getElementById("chatOverlay");
-    const closeChatBtn = document.getElementById("closeChat");
-    const chatForm = document.getElementById("chatForm");
-    const chatInput = document.getElementById("chatInput");
-    const chatMessages = document.getElementById("chatMessages");
-
-    const hide = () => {
-      if (chatOverlay) {
-        chatOverlay.classList.remove("show");
-      }
-    };
-
-    const onBackdrop = (e) => {
-      if (e.target === chatOverlay) {
-        hide();
-      }
-    };
-
-    const onSubmit = (e) => {
-      e.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      const timeStr = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "msg";
-      const userSpan = document.createElement("span");
-      userSpan.className = "user";
-      userSpan.textContent = `You [${timeStr}]:`;
-      msgDiv.appendChild(userSpan);
-      msgDiv.appendChild(document.createTextNode(" " + text));
-      chatMessages.appendChild(msgDiv);
-      chatInput.value = "";
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    };
-
-    if (closeChatBtn) {
-      closeChatBtn.addEventListener("click", hide);
-    }
-    if (chatOverlay) {
-      chatOverlay.addEventListener("click", onBackdrop);
-    }
-    if (chatForm) {
-      chatForm.addEventListener("submit", onSubmit);
-    }
-
-    return () => {
-      if (closeChatBtn) {
-        closeChatBtn.removeEventListener("click", hide);
-      }
-      if (chatOverlay) {
-        chatOverlay.removeEventListener("click", onBackdrop);
-      }
-      if (chatForm) {
-        chatForm.removeEventListener("submit", onSubmit);
-      }
-    };
-  }, []);
 
   /* ---------------------------- CHAT HEADER DATES ---------------------------- */
   useEffect(() => {
